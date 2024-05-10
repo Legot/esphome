@@ -18,13 +18,13 @@ void HONEYWELLABP2Sensor::read_sensor_data() {
     this->mark_failed();
     return;
   }
-  float press_counts = encode_uint24(raw_data_[1], raw_data_[2], raw_data_[3]);  // calculate digital pressure counts
-  float temp_counts = encode_uint24(raw_data_[4], raw_data_[5], raw_data_[6]);   // calculate digital temperature counts
+  float press_counts = encode_uint14(raw_data_[1], raw_data_[2], raw_data_[3]);  // calculate digital pressure counts
+  float temp_counts = encode_uint11(raw_data_[4], raw_data_[5], raw_data_[6]);   // calculate digital temperature counts
 
   this->last_pressure_ = (((press_counts - this->min_count_) / (this->max_count_ - this->min_count_)) *
                           (this->max_pressure_ - this->min_pressure_)) +
                          this->min_pressure_;
-  this->last_temperature_ = (temp_counts * 200 / 16777215) - 50;
+  this->last_temperature_ = (temp_counts * 200 / 2047) - 50;
 }
 
 void HONEYWELLABP2Sensor::start_measurement() {
@@ -76,7 +76,7 @@ void HONEYWELLABP2Sensor::loop() {
 }
 
 void HONEYWELLABP2Sensor::update() {
-  ESP_LOGV(TAG, "Update Honeywell MS45x5DO Sensor");
+  ESP_LOGV(TAG, "Update MS45x5DO Sensor");
 
   this->start_measurement();
   this->set_timeout("meas_timeout", 50, [this] { this->measurement_timeout(); });
